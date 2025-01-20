@@ -1,4 +1,5 @@
 import os
+import click
 from pathlib import Path
 
 from flask_content import *
@@ -59,11 +60,31 @@ def create_structure(base_path, structure):
             path.mkdir(parents=True, exist_ok=True)
 
 # Main function
-def main():
-    base_path = os.path.dirname(os.path.realpath(__file__))
+@click.command()
+@click.option("-p", "--path", required=True, type=click.Path(file_okay=False, writable=True, resolve_path=True), help="The base directory where the project should be scaffolded.")
+@click.option("-a", "--absolute", is_flag=True, help="Specify that the provided path is absolute.")
+@click.option("-r", "--relative", is_flag=True, help="Specify that the provided path is relative.")
+def main(path, absolute, relative):
+    """
+    Scaffold a Flask project.
+
+    -pa, --path: The base directory where the project should be scaffolded.
+    -a, --absolute: Specify that the provided path is absolute.
+    -r, --relative: Specify that the provided path is relative.
+    """
+    # Validate mutually exclusive options
+    if absolute and relative:
+        raise click.UsageError("Options --absolute and --relative are mutually exclusive.")
+    if not absolute and not relative:
+        raise click.UsageError("You must specify either --absolute or --relative.")
+    
+    # Resolve the base path based on the type
+    base_path = Path(path).resolve() if type == "absolute" else Path(os.getcwd()) / path
+
+    # Ensure the base path exists
     os.makedirs(base_path, exist_ok=True)
 
-
+    # Create the folder structure
     create_structure(base_path, FOLDER_STRUCTURE)
     print(f"Project scaffolded at: {base_path}")
 

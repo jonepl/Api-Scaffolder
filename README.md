@@ -30,12 +30,13 @@ A tool to quickly scaffold Python Flask applications with pre-configured setting
 ## Usage
 Scaffold the flask API with the following steps
 
-```
-$ python flask_scaffolder.py
-```
+```bash
+# Scaffolds a new API using absolute path
+$ python flask_scaffolder.py -p /Users/name/Projects/my-app --absolute
 
-
----
+# Scaffolds a new API using relative path
+$ python flask_scaffolder.py -p my-app --relative
+```
 
 ## Project Structure
 - Describe the default folder structure created by the scaffolder.
