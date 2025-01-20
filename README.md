@@ -15,7 +15,7 @@ A tool to quickly scaffold Python Flask applications with pre-configured setting
 ## Features
 - Modular and scalable folder structure.
 - Pre-configured logging with customizable levels.
-- Built-in support for unit and integration testing using `pytest`.
+- Built-in support for unit, integration and e2e testing using `pytest`.
 - Configurable environments (DEV, STAGING, PROD).
 - Linting and formatting with `flake8` and `black`.
 - Support for CORS, database integration, and error handling.
