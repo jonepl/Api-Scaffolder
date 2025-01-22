@@ -39,6 +39,7 @@ FOLDER_STRUCTURE = {
     "pytest.ini": PYTEST_INI,
     "README.md": README_CONTENT,
     "requirements.txt": REQUIREMENTS_TXT,
+    "Dockerfile": DOCKERFILE,
     "Makefile": MAKEFILE
 }
 

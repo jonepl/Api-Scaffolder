@@ -71,7 +71,7 @@ LOGGER_APP_LOGGER = """import logging
 import logging.config
 from dotenv import load_dotenv
 
-from app.logger.helpers import get_config, create_log_file
+from logger.helpers import get_config, create_log_file
 
 # Load environment variables
 load_dotenv()
@@ -90,7 +90,7 @@ def setup_logging():
     logging.config.dictConfig(config)
 """
 
-LOGGER_CONFIG = """from app.logger.constants import APPLICATION_PATH
+LOGGER_CONFIG = """from logger.constants import APPLICATION_PATH
 
 test_config = {
     "version": 1,
@@ -189,8 +189,8 @@ HANDLERS_KEY = "handlers"
 
 LOGGER_HELPER = """import os
 
-import app.logger.config as loggerConfig
-from app.logger.constants import (
+import logger.config as loggerConfig
+from logger.constants import (
     AppEnv,
     FILE_HANDLER_KEY,
     FILENAME_KEY,
@@ -259,11 +259,11 @@ def perform_service_task():
 """
 
 API_CONTENT = """from flask import Flask
-from app.logger.app_logger import setup_logging
+from logger.app_logger import setup_logging
 
 setup_logging()
 
-from app.routes.routes import configure_routes
+from routes.routes import configure_routes
 
 app = Flask(__name__)
 app.logger.info("Starting API ...")
@@ -409,7 +409,10 @@ $ black .
 $ make format
 ```"""
 
-MAKEFILE = """create-venv:
+MAKEFILE = """build-image:
+	docker build -t my-api:latest .
+
+create-venv:
 	python3 -m venv venv
 
 activate-venv:
@@ -422,7 +425,7 @@ install:
 	venv/bin/pip install -r requirements.txt
 
 start:
-	venv/bin/python -m app.api
+	venv/bin/python app/api.py
 
 test:
 	pytest
@@ -432,3 +435,21 @@ lint:
 
 format:
 	black ."""
+
+DOCKERFILE = """FROM python:3.8-slim
+
+WORKDIR /app
+
+# Download Libraries
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Copy app into working directory
+COPY ./app .
+
+# Expose ports
+EXPOSE 8080
+
+# Start application
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "api:app"]
+"""
