@@ -35,6 +35,9 @@ Flask==2.3.2
 Flask-Cors==3.0.10
 pytest==8.1.1
 python-dotenv==0.14.0
+
+# Dev Ops Dependencies
+gunicorn==22.0.0
  
 # Testing Dependencies
 pytest-cov==5.0.0
@@ -377,10 +380,22 @@ You can set the `APP_ENV` environment variable to to initialize the application 
 ### Starting API
 
 ```bash
-$ python -m app.api
+# Starting API Locally
+$ python app/api.py
 
 # OR
 $ make start
+```
+
+### Starting API via Docker Image
+```bash
+$ docker build -t my-api:latest .
+
+docker run -d \
+  --name my-api \
+  --expose 8080 \
+  -p 8080:8080 \
+  my-api:latest
 ```
 
 ### Running tests
