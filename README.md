@@ -13,12 +13,13 @@
 A tool to quickly scaffold Python Flask applications with pre-configured settings for routing, logging, testing, and deployment. Simplify your Flask project setup and get started with minimal effort.
 
 ## Features
-- **Modular and Scalable Folder Structure:** Easily extend the application with a well-organized and maintainable structure.
-- **Pre-configured Logging:** Customizable logging levels for better debugging and monitoring.
-- **Built-in Testing Support:** Unit, integration, and end-to-end testing with `pytest`.
-- **Configurable Environments:** Seamlessly switch between DEV, STAGING, and PROD environments.
-- **Linting and Formatting:** Code quality ensured with `flake8` for linting and `black` for consistent formatting.
-- **Dockerized Deployment:** A ready-to-use `Dockerfile` to containerize the API for streamlined deployment and consistency across environments.
+- Modular and scalable folder structure.
+- Pre-configured logging with customizable levels.
+- Built-in support for unit, integration and e2e testing using `pytest`.
+- Configurable environments (DEV, STAGING, PROD).
+- Linting and formatting with `flake8` and `black`.
+- Support for CORS, database integration, and error handling.
+- Ready-to-use `Dockerfile` to containerize the API
 
 
 ## Installation
