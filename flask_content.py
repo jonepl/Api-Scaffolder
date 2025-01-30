@@ -1,3 +1,61 @@
+API_CONTENT = """from flask import Flask
+from logger.app_logger import setup_logging
+
+setup_logging()
+
+from routes.routes import configure_routes
+
+app = Flask(__name__)
+app.logger.info("Starting API ...")
+
+configure_routes(app)
+
+if __name__ == "__main__":
+    app.run()
+"""
+
+APP_CONSTANTS = """EXAMPLE_CONSTANTS="consts"
+"""
+
+DOCKERFILE = """FROM python:3.8-slim
+
+WORKDIR /app
+
+# Download Libraries
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Copy app into working directory
+COPY ./app .
+
+# Expose ports
+EXPOSE 8080
+
+# Start application
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "api:app"]
+"""
+
+FLAKE8 = """[flake8]
+max-line-length = 106
+exclude = 
+    .git,
+    __pycache__,
+    venv,
+    env
+ignore = E402, E203, W503
+plugins = flake8-black
+"""
+
+GITIGNORE = """# Ignore virtual environment files
+venv/
+
+# Ignore API scaffolder
+api_scaffolder.py
+
+# log files
+app/logger/files
+"""
+
 VS_CODE_CONTENT = """{
   "version": "0.2.0",
   "configurations": [
@@ -35,6 +93,7 @@ Flask==2.3.2
 Flask-Cors==3.0.10
 pytest==8.1.1
 python-dotenv==0.14.0
+Flask-Pydantic==0.12.0
 
 # Dev Ops Dependencies
 gunicorn==22.0.0
@@ -47,27 +106,6 @@ flake8-black==0.3.6
 
 PYTEST_INI = """[pytest]
 pythonpath = .
-"""
-
-GITIGNORE = """# Ignore virtual environment files
-venv/
-
-# Ignore API scaffolder
-api_scaffolder.py
-
-# log files
-app/logger/files
-"""
-
-FLAKE8 = """[flake8]
-max-line-length = 106
-exclude = 
-    .git,
-    __pycache__,
-    venv,
-    env
-ignore = E402, E203, W503
-plugins = flake8-black
 """
 
 LOGGER_APP_LOGGER = """import logging
@@ -226,74 +264,57 @@ def create_log_file(config: dict):
     os.makedirs(dirName, exist_ok=True)
 """
 
-MODEL = """import logging
+MAKEFILE = """build-image:
+	docker build -t my-api:latest .
 
-logger = logging.getLogger(__name__)
+create-venv:
+	python3 -m venv venv
 
+activate-venv:
+	. venv/bin/activate
 
-def get_data():
-    logger.info("Fetching data in my_model.py")
-"""
+deactivate-venv:
+	. venv/bin/deactivate
 
-ROUTES = """import logging
-from flask import jsonify
-from flask_cors import cross_origin
+install:
+	venv/bin/pip install -r requirements.txt
 
-logger = logging.getLogger(__name__)
+start:
+	venv/bin/python app/api.py
 
+test:
+	pytest
 
-def configure_routes(app):
-    @app.route("/api/health", methods=["GET"])
-    @cross_origin()
-    def health():
-        logger.info("Received health GET request")
-        resp = jsonify({"message": "SUCCESS"})
-        resp.status_code = 200
-        return resp
-"""
+lint:
+	flake8 .
 
-SERVICES_CONTENT = """import logging
+format:
+	black ."""
 
-logger = logging.getLogger(__name__)
-
-
-def perform_service_task():
-    logger.info("Performing a service task in my_services.py")
-"""
-
-API_CONTENT = """from flask import Flask
-from logger.app_logger import setup_logging
-
-setup_logging()
-
-from routes.routes import configure_routes
-
-app = Flask(__name__)
-app.logger.info("Starting API ...")
-
-configure_routes(app)
-
-if __name__ == "__main__":
-    app.run()
-"""
-
-TESTS_E2E_CONTENT = """import pytest
-
-from app.api import app as flask_app
+MODEL = """from typing import Optional
+from pydantic import BaseModel
 
 
-@pytest.fixture()
-def client():
-    flask_app.testing = True
-    with flask_app.test_client() as client:
-        yield client
+class QueryModel(BaseModel):
+    age: int
 
 
-def test_root(client):
-    \"""Test the root endpoint ('/') for a 'hello world' message.\"""
-    response = client.get("/api/health")
-    assert response.status_code == 200
-    assert response.json == {"message": "SUCCESS"}
+class ResponseModel(BaseModel):
+    id: int
+    age: int
+    name: str
+    nickname: Optional[str] = None
+
+
+class RequestBodyModel(BaseModel):
+    name: str
+    nickname: Optional[str] = None
+
+
+class RequestFormDataModel(BaseModel):
+    name: str
+    nickname: Optional[str] = None
+
 """
 
 README_CONTENT = """# Read Me
@@ -424,47 +445,97 @@ $ black .
 $ make format
 ```"""
 
-MAKEFILE = """build-image:
-	docker build -t my-api:latest .
+ROUTES = """import logging
+from flask import jsonify
+from flask_cors import cross_origin
+from flask_pydantic import validate
 
-create-venv:
-	python3 -m venv venv
+from models.my_model import (
+    ResponseModel,
+    RequestBodyModel,
+    RequestFormDataModel,
+    QueryModel,
+)
 
-activate-venv:
-	. venv/bin/activate
+logger = logging.getLogger(__name__)
 
-deactivate-venv:
-	. venv/bin/deactivate
 
-install:
-	venv/bin/pip install -r requirements.txt
+def configure_routes(app):
+    @app.route("/api/health", methods=["GET"])
+    @cross_origin()
+    def health():
+        logger.info("Received health GET request")
+        resp = jsonify({"message": "SUCCESS"})
+        resp.status_code = 200
+        return resp
 
-start:
-	venv/bin/python app/api.py
+    # Example query
+    @app.route("/api/users", methods=["GET"])
+    @validate()
+    def get_user(query: QueryModel):
+        age = query.age
+        response = ResponseModel(id=1, age=age, name="John Doe")
+        return response
 
-test:
-	pytest
+    # Example URL path
+    @app.route("/api/users/<user_id>/", methods=["GET"])
+    @validate()
+    def get_character(user_id: int):
+        characters = [
+            ResponseModel(id=1, age=95, name="Geralt", nickname="White Wolf"),
+            ResponseModel(id=2, age=45, name="Triss Merigold", nickname="sorceress"),
+            ResponseModel(
+                id=3, age=42, name="Julian Alfred Pankratz", nickname="Jaskier"
+            ),
+            ResponseModel(id=4, age=101, name="Yennefer", nickname="Yenn"),
+        ]
+        try:
+            return characters[user_id]
+        except IndexError:
+            return {"error": "Not found"}, 400
 
-lint:
-	flake8 .
+    # Example request body
+    @app.route("/api/users/", methods=["POST"])
+    @validate()
+    def post(body: RequestBodyModel):
+        name = body.name
+        nickname = body.nickname
+        return ResponseModel(name=name, nickname=nickname, id=0, age=1000)
 
-format:
-	black ."""
+    # Example form data
+    @app.route("/api/users/formdata/", methods=["POST"])
+    @validate()
+    def post_formdata(form: RequestFormDataModel):
+        name = form.name
+        nickname = form.nickname
+        return ResponseModel(name=name, nickname=nickname, id=0, age=1000)
 
-DOCKERFILE = """FROM python:3.8-slim
+"""
 
-WORKDIR /app
+SERVICES_CONTENT = """import logging
 
-# Download Libraries
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+logger = logging.getLogger(__name__)
 
-# Copy app into working directory
-COPY ./app .
 
-# Expose ports
-EXPOSE 8080
+def perform_service_task():
+    logger.info("Performing a service task in my_services.py")
+"""
 
-# Start application
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "api:app"]
+TESTS_E2E_CONTENT = """import pytest
+
+from app.api import app as flask_app
+
+
+@pytest.fixture()
+def client():
+    flask_app.testing = True
+    with flask_app.test_client() as client:
+        yield client
+
+
+def test_root(client):
+    \"""Test the root endpoint ('/') for a 'hello world' message.\"""
+    response = client.get("/api/health")
+    assert response.status_code == 200
+    assert response.json == {"message": "SUCCESS"}
 """

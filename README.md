@@ -15,9 +15,10 @@ A tool to quickly scaffold Python Flask applications with pre-configured setting
 ## Features
 - Modular and scalable folder structure.
 - Pre-configured logging with customizable levels.
-- Built-in support for unit, integration and e2e testing using `pytest`.
+- Data validation with `Pydantic`
+- Built-in support for unit, integration and e2e testing using `Pytest`.
 - Configurable environments (DEV, STAGING, PROD).
-- Linting and formatting with `flake8` and `black`.
+- Linting and formatting with `Flake8` and `Black`.
 - Support for CORS, database integration, and error handling.
 - Ready-to-use `Dockerfile` to containerize the API
 
@@ -76,6 +77,7 @@ my-flask-app/
 ## Acknowledgments
 
 - `flask` api: https://flask.palletsprojects.com/
+- `pydantic` data validation: https://pypi.org/project/Flask-Pydantic/
 - `black` code formatter: https://black.readthedocs.io/en/stable/
 - `flake8` linter: https://flake8.pycqa.org/en/latest/index.html
 - `pytest` testing framework: https://pytest.org/

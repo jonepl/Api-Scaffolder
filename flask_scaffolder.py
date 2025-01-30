@@ -10,6 +10,9 @@ FOLDER_STRUCTURE = {
         "launch.json": VS_CODE_CONTENT,
     },
     "app": {
+        "constants": {
+            "constants.py": APP_CONSTANTS
+        },
         "logger":  {
             "app_logger.py": LOGGER_APP_LOGGER,
             "config.py": LOGGER_CONFIG,
